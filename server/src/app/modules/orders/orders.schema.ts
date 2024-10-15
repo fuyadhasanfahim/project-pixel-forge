@@ -12,6 +12,11 @@ const OrdersSchema = new Schema<IOrders>(
             ref: 'User',
             required: true,
         },
+        username: {
+            type: String,
+            ref: 'User',
+            required: true,
+        },
         services: {
             type: [String],
             required: true,

@@ -18,7 +18,6 @@ import { Progress } from '@/components/ui/progress'
 import { DateTimePicker } from '../ui/DateTimePicker'
 
 export default function AddOrderForm() {
-    // State management for form inputs
     const [files, setFiles] = useState<File[]>([])
     const [progress, setProgress] = useState<number>(0)
     const [selectedServices, setSelectedServices] = useState<string[]>([])
@@ -30,7 +29,6 @@ export default function AddOrderForm() {
     const [outputFormat, setOutputFormat] = useState<string | undefined>()
     const [deliveryDate, setDeliveryDate] = useState<Date | undefined>()
 
-    // Random prices for complexity levels
     const complexityOptions = [
         { label: 'Basic', price: '$5' },
         { label: 'Simple', price: '$10' },
@@ -56,7 +54,6 @@ export default function AddOrderForm() {
             const selectedFiles = Array.from(e.target.files)
             setFiles(selectedFiles)
 
-            // Simulate file upload progress
             setProgress(50)
             setTimeout(() => setProgress(100), 1000)
         }
@@ -88,8 +85,6 @@ export default function AddOrderForm() {
             deliveryDate,
         }
         console.log('Form Data:', formData)
-
-        // Handle form submission logic (e.g., send to server)
     }
 
     return (
@@ -100,7 +95,6 @@ export default function AddOrderForm() {
                 </h1>
             </div>
             <form onSubmit={handleSubmit} className="space-y-6">
-                {/* File Upload */}
                 <div className="grid w-full max-w-full space-y-2">
                     <Label htmlFor="file-upload">Upload Image</Label>
                     <div className="flex items-center justify-center h-20 border-2 border-dashed rounded-lg border-gray-300">
@@ -125,7 +119,6 @@ export default function AddOrderForm() {
                     {progress > 0 && <Progress value={progress} />}
                 </div>
 
-                {/* Services with complexity select */}
                 <div className="flex flex-col">
                     <h3 className="mb-6 text-lg">Select Services</h3>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
@@ -152,7 +145,6 @@ export default function AddOrderForm() {
                                     </Label>
                                 </div>
 
-                                {/* Show complexity select only when the service is checked */}
                                 {selectedServices.includes(service) && (
                                     <Select
                                         onValueChange={(value) =>
@@ -194,7 +186,6 @@ export default function AddOrderForm() {
                     </div>
                 </div>
 
-                {/* Additional Instructions */}
                 <div className="grid w-full max-w-full space-y-2">
                     <Label htmlFor="message">Additional Instructions</Label>
                     <Textarea
@@ -209,7 +200,6 @@ export default function AddOrderForm() {
                 </div>
 
                 <div className="flex items-center flex-wrap gap-5">
-                    {/* Output Format Selection */}
                     <div className="flex flex-col">
                         <h3 className="mb-3 text-lg">Choose Output Format</h3>
                         <Select onValueChange={setOutputFormat}>
@@ -238,7 +228,6 @@ export default function AddOrderForm() {
                         </Select>
                     </div>
 
-                    {/* Delivery Date */}
                     <div className="flex flex-col">
                         <h3 className="mb-3 text-lg">Choose Delivery Date</h3>
                         <DateTimePicker
@@ -251,7 +240,6 @@ export default function AddOrderForm() {
                     </div>
                 </div>
 
-                {/* Submit Button */}
                 <div className="flex justify-center">
                     <Button type="submit">Submit Order</Button>
                 </div>
