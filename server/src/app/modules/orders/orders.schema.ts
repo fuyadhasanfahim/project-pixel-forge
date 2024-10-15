@@ -22,7 +22,7 @@ const OrdersSchema = new Schema<IOrders>(
             required: true,
         },
         files: {
-            type: [String],
+            type: String,
             required: true,
         },
         additionalInstructions: {

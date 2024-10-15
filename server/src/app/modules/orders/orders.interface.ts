@@ -5,7 +5,7 @@ interface IOrders {
     userId: Types.ObjectId
     services: string[]
     complexities: Record<string, string>
-    files: string[]
+    files: string
     additionalInstructions: string
     outputFormat: string
     deliveryDate: Date
