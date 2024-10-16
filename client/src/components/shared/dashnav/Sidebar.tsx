@@ -19,8 +19,16 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Link, useLocation } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { RootState } from '@/app/store'
+import IUser from '@/types/userInterface'
+import { useFetchOrderByUserIdQuery } from '@/features/orders/orderApi'
 
 export default function Sidebar() {
+    const { user } = useSelector((state: RootState) => state.auth)
+    const { _id } = user as IUser
+    const userId = _id
+    const { data } = useFetchOrderByUserIdQuery(userId)
     const location = useLocation()
 
     return (
@@ -81,7 +89,7 @@ export default function Sidebar() {
                             <ShoppingCart className="h-4 w-4" />
                             Previous Orders
                             <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                                6
+                                {data?.orders?.length}
                             </Badge>
                         </Link>
                         <Link

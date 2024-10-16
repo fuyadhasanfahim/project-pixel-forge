@@ -26,10 +26,6 @@ const OrdersSchema = new Schema<IOrders>(
             of: String,
             required: true,
         },
-        files: {
-            type: String,
-            required: true,
-        },
         additionalInstructions: {
             type: String,
             required: false,

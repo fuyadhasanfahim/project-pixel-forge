@@ -14,12 +14,18 @@ import {
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Progress } from '@/components/ui/progress'
 import { DateTimePicker } from '../ui/DateTimePicker'
+import { useSelector } from 'react-redux'
+import { RootState } from '@/app/store'
+import IUser from '@/types/userInterface'
+import { usePostOrderMutation } from '@/features/orders/orderApi'
+import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
 
 export default function AddOrderForm() {
-    const [files, setFiles] = useState<File[]>([])
-    const [progress, setProgress] = useState<number>(0)
+    const [postOrder, { isLoading }] = usePostOrderMutation()
+    const { user } = useSelector((state: RootState) => state.auth)
+    const { _id, username } = user as IUser
     const [selectedServices, setSelectedServices] = useState<string[]>([])
     const [complexities, setComplexities] = useState<{ [key: string]: string }>(
         {},
@@ -28,6 +34,7 @@ export default function AddOrderForm() {
         useState<string>('')
     const [outputFormat, setOutputFormat] = useState<string | undefined>()
     const [deliveryDate, setDeliveryDate] = useState<Date | undefined>()
+    const navigate = useNavigate()
 
     const complexityOptions = [
         { label: 'Basic', price: '$5' },
@@ -49,16 +56,6 @@ export default function AddOrderForm() {
         'Image Masking',
     ]
 
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files) {
-            const selectedFiles = Array.from(e.target.files)
-            setFiles(selectedFiles)
-
-            setProgress(50)
-            setTimeout(() => setProgress(100), 1000)
-        }
-    }
-
     const handleServiceSelect = (service: string) => {
         setSelectedServices((prevSelected) =>
             prevSelected.includes(service)
@@ -74,17 +71,32 @@ export default function AddOrderForm() {
         }))
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        const formData = {
-            files,
-            selectedServices,
+        const data = {
+            userId: _id,
+            username,
+            services: selectedServices,
             complexities,
             additionalInstructions,
             outputFormat,
             deliveryDate,
         }
-        console.log('Form Data:', formData)
+
+        try {
+            await postOrder(data).unwrap()
+
+            toast.success(
+                'Successfully added to order. Wait to accept your order. Redirecting to dashboard...',
+            )
+
+            setTimeout(() => {
+                navigate('/dashboard')
+            }, 2000)
+        } catch (err) {
+            toast.error((err as Error).message)
+            console.error('Failed to submit the order:', err)
+        }
     }
 
     return (
@@ -112,11 +124,10 @@ export default function AddOrderForm() {
                                 accept="image/*"
                                 multiple
                                 className="hidden"
-                                onChange={handleFileUpload}
                             />
                         </label>
                     </div>
-                    {progress > 0 && <Progress value={progress} />}
+                    {/* {progress > 0 && <Progress value={progress} />} */}
                 </div>
 
                 <div className="flex flex-col">
@@ -241,7 +252,9 @@ export default function AddOrderForm() {
                 </div>
 
                 <div className="flex justify-center">
-                    <Button type="submit">Submit Order</Button>
+                    <Button type="submit" disabled={isLoading}>
+                        Submit Order
+                    </Button>
                 </div>
             </form>
         </div>

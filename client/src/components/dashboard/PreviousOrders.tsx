@@ -1,60 +1,34 @@
+import { RootState } from '@/app/store'
 import {
     Table,
     TableBody,
     TableCaption,
     TableCell,
-    TableFooter,
     TableHead,
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-
-const invoices = [
-    {
-        invoice: 'INV001',
-        paymentStatus: 'Paid',
-        totalAmount: '$250.00',
-        paymentMethod: 'Credit Card',
-    },
-    {
-        invoice: 'INV002',
-        paymentStatus: 'Pending',
-        totalAmount: '$150.00',
-        paymentMethod: 'PayPal',
-    },
-    {
-        invoice: 'INV003',
-        paymentStatus: 'Unpaid',
-        totalAmount: '$350.00',
-        paymentMethod: 'Bank Transfer',
-    },
-    {
-        invoice: 'INV004',
-        paymentStatus: 'Paid',
-        totalAmount: '$450.00',
-        paymentMethod: 'Credit Card',
-    },
-    {
-        invoice: 'INV005',
-        paymentStatus: 'Paid',
-        totalAmount: '$550.00',
-        paymentMethod: 'PayPal',
-    },
-    {
-        invoice: 'INV006',
-        paymentStatus: 'Pending',
-        totalAmount: '$200.00',
-        paymentMethod: 'Bank Transfer',
-    },
-    {
-        invoice: 'INV007',
-        paymentStatus: 'Unpaid',
-        totalAmount: '$300.00',
-        paymentMethod: 'Credit Card',
-    },
-]
+import { useFetchOrderByUserIdQuery } from '@/features/orders/orderApi'
+import IOrders from '@/types/orderInterface'
+import IUser from '@/types/userInterface'
+import { useSelector } from 'react-redux'
 
 export default function PreviousOrders() {
+    const { user } = useSelector((state: RootState) => state.auth)
+    const { _id } = user as IUser
+    const userId = _id
+    const { data, isLoading } = useFetchOrderByUserIdQuery(userId)
+
+    if (isLoading) {
+        return (
+            <div className="h-screen flex justify-center items-center">
+                Loading...
+            </div>
+        )
+    }
+
+    const orders = data?.orders || []
+
     return (
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
             <div className="flex items-center">
@@ -62,46 +36,58 @@ export default function PreviousOrders() {
                     Previous Orders
                 </h1>
             </div>
-            <div
-                className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm"
-                x-chunk="dashboard-02-chunk-1"
-            >
-                <Table className="border">
-                    <TableCaption className="mb-3">
-                        A list of your recent invoices.
-                    </TableCaption>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-[100px]">Invoice</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Method</TableHead>
-                            <TableHead className="text-right">Amount</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {invoices.map((invoice) => (
-                            <TableRow key={invoice.invoice}>
-                                <TableCell className="font-medium">
-                                    {invoice.invoice}
-                                </TableCell>
-                                <TableCell>{invoice.paymentStatus}</TableCell>
-                                <TableCell>{invoice.paymentMethod}</TableCell>
-                                <TableCell className="text-right">
-                                    {invoice.totalAmount}
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                    <TableFooter>
-                        <TableRow>
-                            <TableCell colSpan={3}>Total</TableCell>
-                            <TableCell className="text-right">
-                                $2,500.00
+            <Table className="border rounded-md">
+                <TableCaption className="mb-3">
+                    A list of your recent invoices.
+                </TableCaption>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead className="w-[100px]">Invoice</TableHead>
+                        <TableHead>Username</TableHead>
+                        <TableHead>Services</TableHead>
+                        <TableHead>Complexities</TableHead>
+                        <TableHead>Delivery Date</TableHead>
+                        <TableHead>Status</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {orders.map((order: IOrders) => (
+                        <TableRow key={order._id}>
+                            <TableCell className="font-medium">
+                                {order._id}
+                            </TableCell>
+                            <TableCell>{order.username}</TableCell>
+                            <TableCell>
+                                {order.services.length > 0
+                                    ? order.services.join(', ')
+                                    : 'No services available'}{' '}
+                            </TableCell>
+                            <TableCell>
+                                {order.complexities &&
+                                Object.keys(order.complexities).length > 0
+                                    ? Object.entries(order.complexities).map(
+                                          ([key, value]) => (
+                                              <div key={key}>
+                                                  {key}: {value}
+                                              </div>
+                                          ),
+                                      )
+                                    : 'No complexities available'}
+                            </TableCell>
+                            <TableCell>
+                                {new Date(
+                                    order.deliveryDate,
+                                ).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell>
+                                <span className="text-green-500 font-semibold">
+                                    {order.status}
+                                </span>
                             </TableCell>
                         </TableRow>
-                    </TableFooter>
-                </Table>
-            </div>
+                    ))}
+                </TableBody>
+            </Table>
         </main>
     )
 }

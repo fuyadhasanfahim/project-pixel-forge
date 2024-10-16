@@ -1,8 +1,6 @@
-import { Types } from 'mongoose'
-
 interface IOrders {
-    _id: Types.ObjectId
-    userId: Types.ObjectId
+    _id: string
+    userId: string
     username: string
     services: string[]
     complexities: Record<string, string>

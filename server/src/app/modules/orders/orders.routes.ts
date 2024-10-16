@@ -3,6 +3,7 @@ import { OrdersController } from './orders.controller'
 
 const router = Router()
 
-router.post('/create-orders', OrdersController.createOrders)
+router.post('/create-order', OrdersController.createOrders)
+router.get('/get-order/:userId', OrdersController.getOrders)
 
 export const OrdersRoutes = router

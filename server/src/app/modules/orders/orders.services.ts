@@ -13,6 +13,17 @@ const createOrdersIntoDB = async (orders: Partial<IOrders>) => {
     }
 }
 
+const getOrderByUserIdFromDB = async (userId: string) => {
+    try {
+        const orders = await OrdersModel.find({ userId })
+
+        return orders
+    } catch (error) {
+        throw new Error((error as Error).message)
+    }
+}
+
 export const OrdersServices = {
     createOrdersIntoDB,
+    getOrderByUserIdFromDB,
 }
