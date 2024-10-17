@@ -33,8 +33,19 @@ const getOrderByOrderIdFromDB = async (orderId: string) => {
     }
 }
 
+const getAllOrdersFromDB = async () => {
+    try {
+        const order = await OrdersModel.find()
+
+        return order
+    } catch (error) {
+        throw new Error((error as Error).message)
+    }
+}
+
 export const OrdersServices = {
     createOrdersIntoDB,
     getOrderByUserIdFromDB,
     getOrderByOrderIdFromDB,
+    getAllOrdersFromDB,
 }
