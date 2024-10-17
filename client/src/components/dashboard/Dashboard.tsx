@@ -114,87 +114,90 @@ export default function Dashboard() {
 
     return (
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 space-y-4">
-            <div>
-                <div className="mb-3 text-2xl">
-                    Pending, In Progress , and Awaiting Additional Info Orders
+            {topSectionOrders && (
+                <div>
+                    <div className="mb-3 text-2xl">
+                        Pending, In Progress , and Awaiting Additional Info
+                        Orders
+                    </div>
+                    {topSectionOrders.length > 0 && (
+                        <Table className="border rounded-md">
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Delivery Date</TableHead>
+                                    <TableHead className="w-[100px]">
+                                        Invoice no.
+                                    </TableHead>
+                                    <TableHead>Username</TableHead>
+                                    <TableHead>Services</TableHead>
+                                    <TableHead>Images</TableHead>
+                                    <TableHead>Money</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Info</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody className={``}>
+                                {renderOrders(topSectionOrders)}
+                            </TableBody>
+                        </Table>
+                    )}
                 </div>
-                {topSectionOrders.length > 0 && (
-                    <Table className="border rounded-md">
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Delivery Date</TableHead>
-                                <TableHead className="w-[100px]">
-                                    Invoice no.
-                                </TableHead>
-                                <TableHead>Username</TableHead>
-                                <TableHead>Services</TableHead>
-                                <TableHead>Images</TableHead>
-                                <TableHead>Money</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Info</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody className={``}>
-                            {renderOrders(topSectionOrders)}
-                        </TableBody>
-                    </Table>
-                )}
-            </div>
+            )}
 
-            <div>
-                <h3 className="mb-3 text-2xl text-[#11734b]">
-                    Completed Orders
-                </h3>
-                {completedOrders.length > 0 && (
-                    <Table className="border rounded-md">
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Delivery Date</TableHead>
-                                <TableHead className="w-[100px]">
-                                    Invoice no.
-                                </TableHead>
-                                <TableHead>Username</TableHead>
-                                <TableHead>Services</TableHead>
-                                <TableHead>Images</TableHead>
-                                <TableHead>Money</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Payment</TableHead>
-                                <TableHead>Info</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody className="text-white bg-green-700">
-                            {renderOrders(completedOrders, true)}
-                        </TableBody>
-                    </Table>
-                )}
-            </div>
+            {completedOrders && (
+                <div>
+                    <h3 className="mb-3 text-2xl">Completed Orders</h3>
+                    {completedOrders.length > 0 && (
+                        <Table className="border rounded-md">
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Delivery Date</TableHead>
+                                    <TableHead className="w-[100px]">
+                                        Invoice no.
+                                    </TableHead>
+                                    <TableHead>Username</TableHead>
+                                    <TableHead>Services</TableHead>
+                                    <TableHead>Images</TableHead>
+                                    <TableHead>Money</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Payment</TableHead>
+                                    <TableHead>Info</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody className="text-white bg-green-700">
+                                {renderOrders(completedOrders, true)}
+                            </TableBody>
+                        </Table>
+                    )}
+                </div>
+            )}
 
-            <div>
-                <h3 className="mb-3 text-2xl text-[#b10202]">
-                    Canceled Orders
-                </h3>
-                {canceledOrders.length > 0 && (
-                    <Table className="border rounded-md">
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Delivery Date</TableHead>
-                                <TableHead className="w-[100px]">
-                                    Invoice no.
-                                </TableHead>
-                                <TableHead>Username</TableHead>
-                                <TableHead>Services</TableHead>
-                                <TableHead>Images</TableHead>
-                                <TableHead>Money</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Info</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody className="text-white bg-red-700">
-                            {renderOrders(canceledOrders)}
-                        </TableBody>
-                    </Table>
-                )}
-            </div>
+            {canceledOrders && (
+                <div>
+                    <h3 className="mb-3 text-2xl">Canceled Orders</h3>
+                    {canceledOrders.length > 0 && (
+                        <Table className="border rounded-md">
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Delivery Date</TableHead>
+                                    <TableHead className="w-[100px]">
+                                        Invoice no.
+                                    </TableHead>
+                                    <TableHead>Username</TableHead>
+                                    <TableHead>Services</TableHead>
+                                    <TableHead>Images</TableHead>
+                                    <TableHead>Money</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Info</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody className="text-white bg-red-700">
+                                {renderOrders(canceledOrders)}
+                            </TableBody>
+                        </Table>
+                    )}
+                </div>
+            )}
         </main>
     )
 }
