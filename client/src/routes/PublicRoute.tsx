@@ -9,5 +9,5 @@ export default function PublicRoute({
 }) {
     const isLoggedIn = useAuth()
 
-    return !isLoggedIn ? children : <Navigate to={'/dashboard'} />
+    return !isLoggedIn ? children : <Navigate to={'/auth/confirm-account'} />
 }
