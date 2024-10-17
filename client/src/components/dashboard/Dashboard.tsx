@@ -1,24 +1,174 @@
-import { Button } from '../ui/button'
+import { RootState } from '@/app/store'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table'
+import { useFetchOrderByUserIdQuery } from '@/features/orders/orderApi'
+import IOrders from '@/types/orderInterface'
+import IUser from '@/types/userInterface'
+import { useSelector } from 'react-redux'
 
 export default function Dashboard() {
+    const { user } = useSelector((state: RootState) => state.auth)
+    const { _id } = user as IUser
+    const userId = _id
+    const { data, isLoading } = useFetchOrderByUserIdQuery(userId)
+
+    if (isLoading) {
+        return (
+            <div className="h-screen flex justify-center items-center">
+                Loading...
+            </div>
+        )
+    }
+
+    const orders = data?.orders || []
+
+    const topSectionOrders = orders.filter((order: IOrders) =>
+        [
+            'pending',
+            'request for additional information',
+            'inprogress',
+        ].includes(order.status),
+    )
+    const canceledOrders = orders.filter(
+        (order: IOrders) => order.status === 'canceled',
+    )
+    const completedOrders = orders.filter(
+        (order: IOrders) => order.status === 'completed',
+    )
+
+    const getStatusColor = (status: string): string => {
+        switch (status) {
+            case 'pending':
+                return 'text-green-500'
+            case 'canceled':
+                return 'text-red-500'
+            case 'request for additional information':
+                return 'text-red-500'
+            case 'completed':
+                return 'text-yellow-500'
+            case 'inprogress':
+                return 'text-blue-500'
+            case 'delivered':
+                return 'text-purple-500'
+            default:
+                return 'text-gray-500'
+        }
+    }
+
+    const renderOrders = (orders: IOrders[]) => {
+        return orders.map((order: IOrders) => (
+            <TableRow key={order._id}>
+                <TableCell className="font-medium">{order._id}</TableCell>
+                <TableCell>{order.username}</TableCell>
+                <TableCell>
+                    {order.services.length > 0
+                        ? order.services.join(', ')
+                        : 'No services available'}{' '}
+                </TableCell>
+                <TableCell>
+                    {order.complexities &&
+                    Object.keys(order.complexities).length > 0
+                        ? Object.entries(order.complexities).map(
+                              ([key, value]) => (
+                                  <div key={key}>
+                                      {key}: {value}
+                                  </div>
+                              ),
+                          )
+                        : 'No complexities available'}
+                </TableCell>
+                <TableCell>
+                    {new Date(order.deliveryDate).toLocaleDateString()}
+                </TableCell>
+                <TableCell>
+                    <span
+                        className={`font-semibold ${getStatusColor(order.status)}`}
+                    >
+                        {order.status}
+                    </span>
+                </TableCell>
+            </TableRow>
+        ))
+    }
+
     return (
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
             <div className="flex items-center">
-                <h1 className="text-lg font-semibold md:text-2xl">Inventory</h1>
+                <h1 className="text-lg font-semibold md:text-2xl">Dashboard</h1>
             </div>
-            <div
-                className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm"
-                x-chunk="dashboard-02-chunk-1"
-            >
-                <div className="flex flex-col items-center gap-1 text-center">
-                    <h3 className="text-2xl font-bold tracking-tight">
-                        You have no products
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                        You can start selling as soon as you add a product.
-                    </p>
-                    <Button className="mt-4">Add Product</Button>
+
+            <div>
+                <div className="mb-3 text-xl">
+                    Pending, In Progress, and Awaiting Additional Info Orders
                 </div>
+                {topSectionOrders.length > 0 && (
+                    <Table className="border rounded-md">
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-[100px]">
+                                    Invoice
+                                </TableHead>
+                                <TableHead>Username</TableHead>
+                                <TableHead>Services</TableHead>
+                                <TableHead>Complexities</TableHead>
+                                <TableHead>Delivery Date</TableHead>
+                                <TableHead>Status</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>{renderOrders(topSectionOrders)}</TableBody>
+                    </Table>
+                )}
+            </div>
+
+            <div>
+                <h3 className="mb-3">Canceled Orders</h3>
+
+                {canceledOrders.length > 0 && (
+                    <Table className="border rounded-md">
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-[100px]">
+                                    Invoice
+                                </TableHead>
+                                <TableHead>Username</TableHead>
+                                <TableHead>Services</TableHead>
+                                <TableHead>Complexities</TableHead>
+                                <TableHead>Delivery Date</TableHead>
+                                <TableHead>Status</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>{renderOrders(canceledOrders)}</TableBody>
+                    </Table>
+                )}
+            </div>
+
+            <div>
+                <h3 className="mb-3 text-xl">Completed Orders</h3>
+
+                {completedOrders.length > 0 && (
+                    <Table className="border rounded-md">
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-[100px]">
+                                    Invoice
+                                </TableHead>
+                                <TableHead>Username</TableHead>
+                                <TableHead>Services</TableHead>
+                                <TableHead>Complexities</TableHead>
+                                <TableHead>Delivery Date</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Payment</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>{renderOrders(completedOrders)}</TableBody>
+                    </Table>
+                )}
             </div>
         </main>
     )

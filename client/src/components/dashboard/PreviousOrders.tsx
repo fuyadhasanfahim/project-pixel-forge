@@ -29,6 +29,25 @@ export default function PreviousOrders() {
 
     const orders = data?.orders || []
 
+    const getStatusColor = (status: string): string => {
+        switch (status) {
+            case 'pending':
+                return 'text-green-500'
+            case 'canceled':
+                return 'text-red-500'
+            case 'request for additional information':
+                return 'text-red-500'
+            case 'completed':
+                return 'text-yellow-500'
+            case 'inprogress':
+                return 'text-blue-500'
+            case 'delivered':
+                return 'text-purple-500'
+            default:
+                return 'text-gray-500'
+        }
+    }
+
     return (
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
             <div className="flex items-center">
@@ -80,7 +99,9 @@ export default function PreviousOrders() {
                                 ).toLocaleDateString()}
                             </TableCell>
                             <TableCell>
-                                <span className="text-green-500 font-semibold">
+                                <span
+                                    className={`font-semibold ${getStatusColor(order.status)}`}
+                                >
                                     {order.status}
                                 </span>
                             </TableCell>
