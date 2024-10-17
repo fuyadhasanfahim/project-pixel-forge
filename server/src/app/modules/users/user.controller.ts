@@ -164,6 +164,24 @@ const getCurrentUser: RequestHandler = async (req, res) => {
     }
 }
 
+const getUserByUserID: RequestHandler = async (req, res) => {
+    try {
+        const { userId } = req.params
+
+        const user = await UserService.getUserById(userId)
+
+        if (!user) throw new Error('User not found')
+
+        res.status(httpStatus.OK).json({
+            success: true,
+            message: 'Current user retrieved successfully.',
+            user,
+        })
+    } catch (error) {
+        res.status(400).json({ message: (error as Error).message })
+    }
+}
+
 const verifyEmail: RequestHandler = async (req, res) => {
     const { token } = req.query
 
@@ -202,5 +220,6 @@ export const UserController = {
     createUser,
     loginUser,
     getCurrentUser,
+    getUserByUserID,
     verifyEmail,
 }

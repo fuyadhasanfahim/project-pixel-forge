@@ -76,6 +76,12 @@ export const authApi = apiSlice.injectEndpoints({
                 }
             },
         }),
+        fetchUserById: builder.query({
+            query: (userId) => ({
+                url: `/users/auth/get-user-by-id/${userId}`,
+                method: 'GET',
+            }),
+        }),
         verifyEmail: builder.mutation({
             query: (token) => ({
                 url: `/users/auth/verify-email?token=${token}`,
@@ -97,5 +103,6 @@ export const {
     useRegisterMutation,
     useLoginMutation,
     useFetchCurrentUserQuery,
+    useFetchUserByIdQuery,
     useVerifyEmailMutation,
 } = authApi
