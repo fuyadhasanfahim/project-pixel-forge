@@ -23,7 +23,16 @@ export const orderApi = apiSlice.injectEndpoints({
                       ]
                     : [{ type: 'Orders', id: 'LIST' }],
         }),
+        fetchOrderByOrderId: builder.query({
+            query: (orderId) => `/orders/get-order-by-order-id/${orderId}`,
+            providesTags: (result) =>
+                result ? [{ type: 'Orders', id: result._id }] : ['Orders'],
+        }),
     }),
 })
 
-export const { usePostOrderMutation, useFetchOrderByUserIdQuery } = orderApi
+export const {
+    usePostOrderMutation,
+    useFetchOrderByUserIdQuery,
+    useFetchOrderByOrderIdQuery,
+} = orderApi

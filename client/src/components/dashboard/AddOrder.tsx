@@ -206,7 +206,7 @@ export default function AddOrderForm() {
                             setAdditionalInstructions(e.target.value)
                         }
                         placeholder="Add any details about your order..."
-                        rows={4}
+                        className="resize-none h-32"
                     />
                 </div>
 

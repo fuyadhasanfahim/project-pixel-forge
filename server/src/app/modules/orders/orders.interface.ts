@@ -17,6 +17,7 @@ interface IOrders {
         | 'revision'
         | 'canceled'
         | 'request for additional information'
+    paymentStatus: 'pending' | 'paid'
 }
 
 export default IOrders

@@ -23,7 +23,18 @@ const getOrderByUserIdFromDB = async (userId: string) => {
     }
 }
 
+const getOrderByOrderIdFromDB = async (orderId: string) => {
+    try {
+        const order = await OrdersModel.findOne({ _id: orderId })
+
+        return order
+    } catch (error) {
+        throw new Error((error as Error).message)
+    }
+}
+
 export const OrdersServices = {
     createOrdersIntoDB,
     getOrderByUserIdFromDB,
+    getOrderByOrderIdFromDB,
 }

@@ -12,6 +12,7 @@ import PublicRoute from './routes/PublicRoute'
 import ConfirmAccountPage from './pages/auth/ConfirmAccountPage'
 import AddOrderPage from './pages/dashboard/AddOrderPage'
 import PreviousOrdersPage from './pages/dashboard/PreviousOrdersPage'
+import OrderInfoPage from './pages/dashboard/OrderInfoPage'
 
 export default function App() {
     const authChecked = useAuthCheck()
@@ -97,6 +98,14 @@ export default function App() {
                     element={
                         <PrivateRoute>
                             <PreviousOrdersPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/dashboard/view-order-info/:orderId"
+                    element={
+                        <PrivateRoute>
+                            <OrderInfoPage />
                         </PrivateRoute>
                     }
                 />

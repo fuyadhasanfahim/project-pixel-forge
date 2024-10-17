@@ -42,7 +42,35 @@ const getOrders: RequestHandler = async (req, res) => {
     }
 }
 
+const getOrderByOrderId: RequestHandler = async (req, res) => {
+    try {
+        const { orderId } = req.params
+
+        const order = await OrdersServices.getOrderByOrderIdFromDB(orderId)
+
+        if (!order) {
+            res.status(httpStatus.NOT_FOUND).json({
+                success: false,
+                message: 'Order not found',
+            })
+        }
+
+        res.status(httpStatus.OK).json({
+            success: true,
+            message: 'Order retrieved successfully',
+            order,
+        })
+    } catch (error) {
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: (error as Error).message,
+            error,
+        })
+    }
+}
+
 export const OrdersController = {
     createOrders,
     getOrders,
+    getOrderByOrderId,
 }

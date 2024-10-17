@@ -5,7 +5,6 @@ import {
     PlusSquare,
     DollarSign,
     Settings,
-    CircleUser,
     Slack,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
@@ -26,7 +25,7 @@ import { useFetchOrderByUserIdQuery } from '@/features/orders/orderApi'
 
 export default function Sidebar() {
     const { user } = useSelector((state: RootState) => state.auth)
-    const { _id } = user as IUser
+    const { _id, profileImage } = user as IUser
     const userId = _id
     const { data } = useFetchOrderByUserIdQuery(userId)
     const location = useLocation()
@@ -50,7 +49,11 @@ export default function Sidebar() {
                                 size="icon"
                                 className="rounded-full"
                             >
-                                <CircleUser className="h-5 w-5" />
+                                <img
+                                    src={profileImage}
+                                    alt="profileImage"
+                                    className="rounded-full"
+                                />
                                 <span className="sr-only">
                                     Toggle user menu
                                 </span>

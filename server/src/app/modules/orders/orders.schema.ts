@@ -50,6 +50,12 @@ const OrdersSchema = new Schema<IOrders>(
             default: 'pending',
             required: true,
         },
+        paymentStatus: {
+            type: String,
+            enum: ['pending', 'paid'],
+            default: 'pending',
+            required: true,
+        },
     },
     { timestamps: true },
 )

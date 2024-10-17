@@ -11,12 +11,14 @@ import { useFetchOrderByUserIdQuery } from '@/features/orders/orderApi'
 import IOrders from '@/types/orderInterface'
 import IUser from '@/types/userInterface'
 import { useSelector } from 'react-redux'
+import { useNavigate } from 'react-router-dom'
 
 export default function Dashboard() {
     const { user } = useSelector((state: RootState) => state.auth)
     const { _id } = user as IUser
     const userId = _id
     const { data, isLoading } = useFetchOrderByUserIdQuery(userId)
+    const navigate = useNavigate()
 
     if (isLoading) {
         return (
@@ -45,25 +47,38 @@ export default function Dashboard() {
     const getStatusColor = (status: string): string => {
         switch (status) {
             case 'pending':
-                return 'text-green-500'
+                return 'bg-[#ffe5a0]'
             case 'canceled':
-                return 'text-red-500'
+                return 'bg-[#b10202]'
             case 'request for additional information':
-                return 'text-red-500'
+                return 'bg-[#b10202]'
             case 'completed':
-                return 'text-yellow-500'
+                return 'bg-[#11734b]'
             case 'inprogress':
-                return 'text-blue-500'
+                return 'bg-[#0a53a8] text-white'
             case 'delivered':
-                return 'text-purple-500'
+                return 'bg-purple-500'
             default:
-                return 'text-gray-500'
+                return 'bg-gray-500'
         }
     }
 
-    const renderOrders = (orders: IOrders[]) => {
-        return orders.map((order: IOrders) => (
-            <TableRow key={order._id}>
+    const renderPaymentStatus = (order: IOrders) => {
+        return order.paymentStatus === 'paid' ? 'paid' : 'pending'
+    }
+
+    const renderOrders = (
+        orders: IOrders[],
+        showPaymentStatus: boolean = false,
+    ) => {
+        return orders.map((order: IOrders, index: number) => (
+            <TableRow
+                key={index}
+                className={` ${getStatusColor(order.status)}`}
+            >
+                <TableCell>
+                    {new Date(order.deliveryDate).toLocaleDateString()}
+                </TableCell>
                 <TableCell className="font-medium">{order._id}</TableCell>
                 <TableCell>{order.username}</TableCell>
                 <TableCell>
@@ -71,102 +86,112 @@ export default function Dashboard() {
                         ? order.services.join(', ')
                         : 'No services available'}{' '}
                 </TableCell>
+                <TableCell>1000</TableCell>
+                <TableCell>$ 150</TableCell>
                 <TableCell>
-                    {order.complexities &&
-                    Object.keys(order.complexities).length > 0
-                        ? Object.entries(order.complexities).map(
-                              ([key, value]) => (
-                                  <div key={key}>
-                                      {key}: {value}
-                                  </div>
-                              ),
-                          )
-                        : 'No complexities available'}
-                </TableCell>
-                <TableCell>
-                    {new Date(order.deliveryDate).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                    <span
-                        className={`font-semibold ${getStatusColor(order.status)}`}
-                    >
+                    <span className={`font-semibold uppercase`}>
                         {order.status}
                     </span>
+                </TableCell>
+                {showPaymentStatus && (
+                    <TableCell className="uppercase">
+                        {renderPaymentStatus(order)}
+                    </TableCell>
+                )}
+                <TableCell>
+                    <button
+                        className="underline"
+                        onClick={() =>
+                            navigate(`/dashboard/view-order-info/${order._id}`)
+                        }
+                    >
+                        View
+                    </button>
                 </TableCell>
             </TableRow>
         ))
     }
 
     return (
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-            <div className="flex items-center">
-                <h1 className="text-lg font-semibold md:text-2xl">Dashboard</h1>
-            </div>
-
+        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 space-y-4">
             <div>
-                <div className="mb-3 text-xl">
-                    Pending, In Progress, and Awaiting Additional Info Orders
+                <div className="mb-3 text-2xl">
+                    Pending, In Progress , and Awaiting Additional Info Orders
                 </div>
                 {topSectionOrders.length > 0 && (
                     <Table className="border rounded-md">
                         <TableHeader>
                             <TableRow>
+                                <TableHead>Delivery Date</TableHead>
                                 <TableHead className="w-[100px]">
-                                    Invoice
+                                    Invoice no.
                                 </TableHead>
                                 <TableHead>Username</TableHead>
                                 <TableHead>Services</TableHead>
-                                <TableHead>Complexities</TableHead>
-                                <TableHead>Delivery Date</TableHead>
+                                <TableHead>Images</TableHead>
+                                <TableHead>Money</TableHead>
                                 <TableHead>Status</TableHead>
+                                <TableHead>Info</TableHead>
                             </TableRow>
                         </TableHeader>
-                        <TableBody>{renderOrders(topSectionOrders)}</TableBody>
+                        <TableBody className={``}>
+                            {renderOrders(topSectionOrders)}
+                        </TableBody>
                     </Table>
                 )}
             </div>
 
             <div>
-                <h3 className="mb-3">Canceled Orders</h3>
-
-                {canceledOrders.length > 0 && (
-                    <Table className="border rounded-md">
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="w-[100px]">
-                                    Invoice
-                                </TableHead>
-                                <TableHead>Username</TableHead>
-                                <TableHead>Services</TableHead>
-                                <TableHead>Complexities</TableHead>
-                                <TableHead>Delivery Date</TableHead>
-                                <TableHead>Status</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>{renderOrders(canceledOrders)}</TableBody>
-                    </Table>
-                )}
-            </div>
-
-            <div>
-                <h3 className="mb-3 text-xl">Completed Orders</h3>
-
+                <h3 className="mb-3 text-2xl text-[#11734b]">
+                    Completed Orders
+                </h3>
                 {completedOrders.length > 0 && (
                     <Table className="border rounded-md">
                         <TableHeader>
                             <TableRow>
+                                <TableHead>Delivery Date</TableHead>
                                 <TableHead className="w-[100px]">
-                                    Invoice
+                                    Invoice no.
                                 </TableHead>
                                 <TableHead>Username</TableHead>
                                 <TableHead>Services</TableHead>
-                                <TableHead>Complexities</TableHead>
-                                <TableHead>Delivery Date</TableHead>
+                                <TableHead>Images</TableHead>
+                                <TableHead>Money</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead>Payment</TableHead>
+                                <TableHead>Info</TableHead>
                             </TableRow>
                         </TableHeader>
-                        <TableBody>{renderOrders(completedOrders)}</TableBody>
+                        <TableBody className="text-white bg-green-700">
+                            {renderOrders(completedOrders, true)}
+                        </TableBody>
+                    </Table>
+                )}
+            </div>
+
+            <div>
+                <h3 className="mb-3 text-2xl text-[#b10202]">
+                    Canceled Orders
+                </h3>
+                {canceledOrders.length > 0 && (
+                    <Table className="border rounded-md">
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Delivery Date</TableHead>
+                                <TableHead className="w-[100px]">
+                                    Invoice no.
+                                </TableHead>
+                                <TableHead>Username</TableHead>
+                                <TableHead>Services</TableHead>
+                                <TableHead>Images</TableHead>
+                                <TableHead>Money</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Info</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody className="text-white bg-red-700">
+                            {renderOrders(canceledOrders)}
+                        </TableBody>
                     </Table>
                 )}
             </div>

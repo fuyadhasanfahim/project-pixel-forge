@@ -5,5 +5,9 @@ const router = Router()
 
 router.post('/create-order', OrdersController.createOrders)
 router.get('/get-order/:userId', OrdersController.getOrders)
+router.get(
+    '/get-order-by-order-id/:orderId',
+    OrdersController.getOrderByOrderId,
+)
 
 export const OrdersRoutes = router
