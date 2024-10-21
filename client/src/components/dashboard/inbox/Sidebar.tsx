@@ -10,42 +10,6 @@ export default function Sidebar() {
             </h2>
             <ScrollArea className="h-[calc(100vh-100px)]">
                 <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
-                <ChatItems />
             </ScrollArea>
         </div>
     )
