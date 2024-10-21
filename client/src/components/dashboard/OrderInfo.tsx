@@ -26,8 +26,6 @@ export default function OrderInfo() {
 
     const { role, _id, name } = loggedInUser as IUser
 
-    console.log(role, _id, name)
-
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'pending':

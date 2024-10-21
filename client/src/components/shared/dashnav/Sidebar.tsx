@@ -6,6 +6,7 @@ import {
     DollarSign,
     Settings,
     Slack,
+    Mail,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -25,7 +26,7 @@ import { useFetchOrderByUserIdQuery } from '@/features/orders/orderApi'
 
 export default function Sidebar() {
     const { user } = useSelector((state: RootState) => state.auth)
-    const { _id, profileImage } = user as IUser
+    const { _id, profileImage, role } = user as IUser
     const userId = _id
     const { data } = useFetchOrderByUserIdQuery(userId)
     const location = useLocation()
@@ -85,6 +86,15 @@ export default function Sidebar() {
                             <PlusSquare className="h-4 w-4" />
                             Add Order
                         </Link>
+                        {role === 'superAdmin' && (
+                            <Link
+                                to={'/dashboard/inbox'}
+                                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${location.pathname == '/dashboard/inbox' && 'text-primary'}`}
+                            >
+                                <Mail className="h-4 w-4" />
+                                Inbox
+                            </Link>
+                        )}
                         <Link
                             to={'/dashboard/previous-orders'}
                             className={`flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary ${location.pathname == '/dashboard/previous-orders' && 'text-primary'}`}
