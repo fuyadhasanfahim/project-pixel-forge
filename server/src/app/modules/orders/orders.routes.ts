@@ -10,5 +10,6 @@ router.get(
     OrdersController.getOrderByOrderId,
 )
 router.get('/get-all-orders', OrdersController.getAllOrders)
+router.put('/update-order/:orderId', OrdersController.updateOrderById)
 
 export const OrdersRoutes = router

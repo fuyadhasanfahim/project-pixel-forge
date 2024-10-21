@@ -94,9 +94,41 @@ const getAllOrders: RequestHandler = async (req, res) => {
     }
 }
 
+const updateOrderById: RequestHandler = async (req, res) => {
+    try {
+        const { orderId } = req.params
+        const updateData = req.body
+
+        if (!orderId) {
+            res.status(httpStatus.NOT_FOUND).json({
+                success: false,
+                message: 'Order ID is required',
+            })
+        }
+
+        const updatedOrder = await OrdersServices.updateOrderByIdIntoDB(
+            orderId,
+            updateData,
+        )
+
+        res.status(httpStatus.OK).json({
+            success: true,
+            message: 'Order updated successfully',
+            order: updatedOrder,
+        })
+    } catch (error) {
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: (error as Error).message,
+            error,
+        })
+    }
+}
+
 export const OrdersController = {
     createOrders,
     getOrders,
     getOrderByOrderId,
     getAllOrders,
+    updateOrderById,
 }

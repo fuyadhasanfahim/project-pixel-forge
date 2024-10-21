@@ -43,9 +43,28 @@ const getAllOrdersFromDB = async () => {
     }
 }
 
+const updateOrderByIdIntoDB = async (orderId: string, updateData: IOrders) => {
+    try {
+        const updatedOrder = await OrdersModel.findByIdAndUpdate(
+            orderId,
+            updateData,
+            { new: true },
+        )
+
+        if (!updatedOrder) {
+            throw new Error('Order not found')
+        }
+
+        return updatedOrder
+    } catch (error) {
+        throw new Error((error as Error).message)
+    }
+}
+
 export const OrdersServices = {
     createOrdersIntoDB,
     getOrderByUserIdFromDB,
     getOrderByOrderIdFromDB,
     getAllOrdersFromDB,
+    updateOrderByIdIntoDB,
 }

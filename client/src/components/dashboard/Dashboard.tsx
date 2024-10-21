@@ -131,7 +131,7 @@ export default function Dashboard() {
                                     <TableHead>Username</TableHead>
                                     <TableHead>Services</TableHead>
                                     <TableHead>Images</TableHead>
-                                    <TableHead>Money</TableHead>
+                                    <TableHead>Price</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Info</TableHead>
                                 </TableRow>
@@ -158,7 +158,7 @@ export default function Dashboard() {
                                     <TableHead>Username</TableHead>
                                     <TableHead>Services</TableHead>
                                     <TableHead>Images</TableHead>
-                                    <TableHead>Money</TableHead>
+                                    <TableHead>Price</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Payment</TableHead>
                                     <TableHead>Info</TableHead>
@@ -186,7 +186,7 @@ export default function Dashboard() {
                                     <TableHead>Username</TableHead>
                                     <TableHead>Services</TableHead>
                                     <TableHead>Images</TableHead>
-                                    <TableHead>Money</TableHead>
+                                    <TableHead>Price</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Info</TableHead>
                                 </TableRow>

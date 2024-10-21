@@ -1,18 +1,32 @@
-import { useFetchOrderByOrderIdQuery } from '@/features/orders/orderApi'
+import {
+    useFetchOrderByOrderIdQuery,
+    useUpdateOrderMutation,
+} from '@/features/orders/orderApi'
 import { useParams } from 'react-router-dom'
 import { Alert } from '../ui/alert'
 import { useFetchUserByIdQuery } from '@/features/auth/authApi'
 import { Button } from '../ui/button'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Textarea } from '../ui/textarea'
+import { useSelector } from 'react-redux'
+import { RootState } from '@/app/store'
+import { toast } from 'react-hot-toast'
+import { FolderUp } from 'lucide-react'
+import IUser from '@/types/userInterface'
 
 export default function OrderInfo() {
+    const { user: loggedInUser } = useSelector((state: RootState) => state.auth)
     const { orderId } = useParams<{ orderId: string }>()
     const { data, isLoading, error } = useFetchOrderByOrderIdQuery(orderId)
     const { data: user } = useFetchUserByIdQuery(data?.order?.userId)
     const [reply, setReply] = useState(false)
-
     const order = data?.order
+    const [updateOrder] = useUpdateOrderMutation()
+    const fileInputRef = useRef<HTMLInputElement | null>(null)
+
+    const { role, _id, name } = loggedInUser as IUser
+
+    console.log(role, _id, name)
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -27,6 +41,27 @@ export default function OrderInfo() {
             default:
                 return 'text-gray-500'
         }
+    }
+
+    const handleReply = () => {
+        if (order?.status === 'pending') {
+            toast.error(
+                'Cannot reply to a pending order. Change the status first.',
+            )
+            return
+        }
+        setReply(!reply)
+    }
+
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files
+        if (files) {
+            console.log('Selected files:', files)
+        }
+    }
+
+    const handleClick = () => {
+        fileInputRef.current?.click()
     }
 
     if (isLoading) {
@@ -46,114 +81,209 @@ export default function OrderInfo() {
     }
 
     return (
-        <div className="flex flex-col items-center p-4 w-full space-y-6">
-            <div className="w-full px-6">
-                <h1 className="text-2xl text-start font-semibold">
-                    Order Details
-                </h1>
-            </div>
+        <div className="p-6 space-y-6 w-full max-w-7xl mx-auto">
+            <h1 className="text-2xl font-semibold">Order Details</h1>
 
             <div
-                className={`w-full max-w-7xl border rounded-lg shadow transition-all duration-500 ${
-                    reply ? 'h-auto' : 'h-[400px]'
-                }`}
+                className={`border rounded-lg shadow transition-all duration-500 h-auto`}
             >
-                <div>
-                    <div className="bg-green-500 py-3 px-6 rounded-t-lg text-white flex justify-between items-center">
-                        <h3>Order ID: {order?._id}</h3>
-                        <img
-                            src={user?.user?.profileImage}
-                            alt="profileimage"
-                            className="h-6 w-6 rounded-full ring ring-white"
-                        />
-                    </div>
+                <div className="bg-green-500 text-white py-3 px-6 rounded-t-lg flex justify-between items-center">
+                    <h3>Order ID: {order?._id}</h3>
+                    <img
+                        src={user?.user?.profileImage}
+                        alt="profile"
+                        className="h-8 w-8 rounded-full ring ring-white"
+                    />
                 </div>
-                <div className="space-y-4 px-6 py-4">
-                    <div className="flex flex-col gap-5">
-                        <div className="text-gray-600 flex gap-x-10">
-                            <span>
+
+                <div className="space-y-4 p-6">
+                    <div className="flex items-center justify-between">
+                        <div className="flex gap-10 flex-wrap">
+                            <div>
                                 <strong>User ID:</strong> {order?.userId}
-                            </span>
-                            <span>
+                            </div>
+                            <div>
                                 <strong>User Name:</strong> {user?.user?.name}
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-x-5">
-                            <div>
-                                <strong>Status:</strong>{' '}
-                                <span className={getStatusColor(order?.status)}>
-                                    {order?.status}
-                                </span>
-                            </div>
-                            <div>
-                                <strong>Delivery Date:</strong>{' '}
-                                {new Date(
-                                    order?.deliveryDate,
-                                ).toLocaleDateString()}
-                            </div>
-                            <div>
-                                <strong>Images:</strong> 1000
-                            </div>
-                            <div>
-                                <strong>Price:</strong> $ 100
-                            </div>
-                            <div>
-                                <strong>Payment Status:</strong>{' '}
-                                {order?.paymentStatus}
                             </div>
                         </div>
 
-                        <div className="flex items-start gap-x-5">
-                            <div>
-                                <strong>Output Format:</strong>{' '}
-                                {order?.outputFormat}
-                            </div>
-                            <div>
-                                <strong>Services:</strong>{' '}
-                                {order?.services.length > 0
-                                    ? order.services.join(', ')
-                                    : 'No services available'}
-                            </div>
-                            <div>
-                                <strong>Complexities:</strong>
-                                <ul>
-                                    {order?.complexities &&
-                                        Object.entries(order.complexities).map(
-                                            ([key, value]) => (
-                                                <li
-                                                    key={key}
-                                                    className="normal-case list-disc"
-                                                >
-                                                    {key}: {value as string}
-                                                </li>
-                                            ),
-                                        )}
-                                </ul>
-                            </div>
+                        <div>
+                            {role === 'user' ? (
+                                <div className="flex items-center gap-5">
+                                    <Button
+                                        variant={'outline'}
+                                        disabled={order?.status !== 'delivered'}
+                                        onClick={async () =>
+                                            await updateOrder({
+                                                orderId,
+                                                updateData: {
+                                                    status: 'completed',
+                                                },
+                                            })
+                                        }
+                                    >
+                                        {order?.status === 'completed'
+                                            ? 'Accepted'
+                                            : 'Accept'}
+                                    </Button>
+                                    <Button
+                                        variant={'outline'}
+                                        disabled={order?.status !== 'delivered'}
+                                        onClick={async () =>
+                                            await updateOrder({
+                                                orderId,
+                                                updateData: {
+                                                    status: 'revision',
+                                                },
+                                            })
+                                        }
+                                    >
+                                        Send to revision
+                                    </Button>
+                                </div>
+                            ) : (
+                                <>
+                                    {order?.status === 'pending' ? (
+                                        <Button
+                                            variant={'outline'}
+                                            onClick={async () =>
+                                                await updateOrder({
+                                                    orderId,
+                                                    updateData: {
+                                                        status: 'inprogress',
+                                                    },
+                                                })
+                                            }
+                                        >
+                                            Accept Order
+                                        </Button>
+                                    ) : order?.status === 'delivered' ? (
+                                        <Button
+                                            variant={'outline'}
+                                            className={'cursor-not-allowed'}
+                                        >
+                                            Delivered
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            variant={'outline'}
+                                            onClick={async () =>
+                                                await updateOrder({
+                                                    orderId,
+                                                    updateData: {
+                                                        status: 'delivered',
+                                                    },
+                                                })
+                                            }
+                                        >
+                                            Deliver Order
+                                        </Button>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="flex gap-5 flex-wrap">
+                        <div>
+                            <strong>Status:</strong>{' '}
+                            <span className={getStatusColor(order?.status)}>
+                                {order?.status}
+                            </span>
                         </div>
                         <div>
-                            <strong>Additional Instructions:</strong>{' '}
-                            {order?.additionalInstructions || 'None'}
+                            <strong>Delivery Date:</strong>{' '}
+                            {new Date(order?.deliveryDate).toLocaleDateString()}
+                        </div>
+                        <div>
+                            <strong>Images:</strong> 1000
+                        </div>
+                        <div>
+                            <strong>Price:</strong> $100
+                        </div>
+                        <div>
+                            <strong>Payment Status:</strong>{' '}
+                            <span
+                                className={
+                                    order?.status === 'completed'
+                                        ? 'text-yellow-500'
+                                        : 'text-black'
+                                }
+                            >
+                                {order?.paymentStatus || 'N/A'}
+                            </span>
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between gap-x-5">
+                    <div className="flex gap-5 flex-wrap">
+                        <div>
+                            <strong>Output Format:</strong>{' '}
+                            {order?.outputFormat}
+                        </div>
+                        <div>
+                            <strong>Services:</strong>{' '}
+                            {order?.services.length > 0
+                                ? order.services.join(', ')
+                                : 'No services available'}
+                        </div>
+                        <div>
+                            <strong>Complexities:</strong>
+                            <ul className="ml-6 list-disc">
+                                {order?.complexities &&
+                                    Object.entries(order.complexities).map(
+                                        ([key, value]) => (
+                                            <li key={key}>
+                                                {key}: {value as string}
+                                            </li>
+                                        ),
+                                    )}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div>
+                        <strong>Additional Instructions:</strong>{' '}
+                        {order?.additionalInstructions || 'None'}
+                    </div>
+
+                    <div className="flex justify-between items-center flex-wrap gap-5">
                         <div>
                             <strong>Order Submitted by:</strong>{' '}
                             {order?.username}
                         </div>
-                        <Button onClick={() => setReply(!reply)}>
+
+                        <Button onClick={handleReply}>
                             {reply ? 'Cancel Reply' : 'Reply'}
                         </Button>
                     </div>
 
                     {reply && (
-                        <div className="mt-4 p-4 border rounded-lg bg-gray-50 transition-height duration-300">
+                        <div className="mt-4 p-4 border rounded-lg bg-gray-50">
                             <Textarea
                                 className="w-full"
                                 placeholder="Write your reply..."
                             />
-                            <Button className="mt-2">Send Reply</Button>
+                            <div className="flex items-center gap-5 mt-2">
+                                <Button>Send Reply</Button>
+                                <div>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        ref={fileInputRef}
+                                        onChange={handleFileUpload}
+                                        style={{ display: 'none' }}
+                                    />
+                                    <Button
+                                        variant={'outline'}
+                                        onClick={handleClick}
+                                        className="flex items-center gap-2"
+                                    >
+                                        <FolderUp className="w-5 h-5" />
+                                        Update Images
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
