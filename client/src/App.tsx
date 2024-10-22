@@ -14,6 +14,7 @@ import AddOrderPage from './pages/dashboard/AddOrderPage'
 import PreviousOrdersPage from './pages/dashboard/PreviousOrdersPage'
 import OrderInfoPage from './pages/dashboard/OrderInfoPage'
 import InboxPage from './pages/dashboard/InboxPage'
+import OnlyInboxPage from './pages/dashboard/OnlyInbox'
 
 export default function App() {
     const authChecked = useAuthCheck()
@@ -112,6 +113,14 @@ export default function App() {
                 />
                 <Route
                     path="/dashboard/inbox"
+                    element={
+                        <PrivateRoute>
+                            <OnlyInboxPage />
+                        </PrivateRoute>
+                    }
+                />
+                <Route
+                    path="/dashboard/inbox/:conversationId"
                     element={
                         <PrivateRoute>
                             <InboxPage />

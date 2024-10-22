@@ -1,4 +1,5 @@
 interface IUser {
+    _id: string
     userId: string
     username: string
     name: string
@@ -6,17 +7,12 @@ interface IUser {
     profileImage: string
 }
 
-interface IMessage {
-    conversationId: string
-    senderId: string
-    receiverId: string
-    message: string
-}
-
 interface IConversation {
+    _id: string
     participants: string
     users: IUser[]
     message: string
+    updatedAt: Date
 }
 
-export { IUser, IConversation, IMessage }
+export default IConversation

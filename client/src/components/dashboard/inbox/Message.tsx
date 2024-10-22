@@ -1,22 +1,31 @@
-export default function Message() {
-    return (
-        <div className="m-2">
-            <div className="flex items-end justify-end mb-4">
-                <div className="bg-black text-white max-w-xs p-3 rounded-lg rounded-br-none shadow">
-                    <p>Hi there! How can I help you today?</p>
-                    <span className="text-xs block text-right mt-1">
-                        {new Date().toLocaleTimeString()}
-                    </span>
-                </div>
-            </div>
+import { RootState } from '@/app/store'
+import IMessage from '@/types/messageInterface'
+import IUser from '@/types/userInterface'
+import { useSelector } from 'react-redux'
 
-            <div className="flex items-end justify-start mb-4">
-                <div className="max-w-xs p-3 border rounded-lg rounded-bl-none shadow">
-                    <p>I have a few questions regarding my order.</p>
-                    <span className="text-xs block text-left mt-1">
-                        {new Date().toLocaleTimeString()}
-                    </span>
-                </div>
+function getMessageClass(isSender: boolean) {
+    return `max-w-xs p-3 rounded-lg shadow ${
+        isSender
+            ? 'bg-black text-white rounded-br-none'
+            : 'border rounded-bl-none'
+    }`
+}
+
+export default function Message({ message }: { message: IMessage }) {
+    const { user } = useSelector((state: RootState) => state.auth)
+    const { _id } = user as IUser
+
+    const isSender = message.senderId._id === _id
+
+    return (
+        <div
+            className={`m-2 mb-4 flex items-end ${isSender ? 'justify-end' : 'justify-start'}`}
+        >
+            <div className={getMessageClass(isSender)}>
+                <p>{message.message}</p>
+                <span className="text-xs block mt-1">
+                    {new Date(message.createdAt).toLocaleTimeString()}
+                </span>
             </div>
         </div>
     )

@@ -1,41 +1,53 @@
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Send } from 'lucide-react'
 import Message from './Message'
 import { RootState } from '@/app/store'
 import { useSelector } from 'react-redux'
 import IUser from '@/types/userInterface'
 import { Avatar, AvatarImage } from '@/components/ui/avatar'
+import { useGetMessageQuery } from '@/features/messages/messageApi'
+import { useGetAllConversationsQuery } from '@/features/conversations/conversationApi'
+import IMessage from '@/types/messageInterface'
+import { useParams } from 'react-router-dom'
+import InputField from './InputField'
 
 export default function Messages() {
+    const { conversationId } = useParams<{ conversationId: string }>()
     const { user } = useSelector((state: RootState) => state.auth)
-    const { profileImage, name } = user as IUser
+    const { _id } = user as IUser
+    const { data } = useGetAllConversationsQuery({})
+    const conversations =
+        data && Array.isArray(data.conversations) ? data.conversations : []
+
+    const { data: messages } = useGetMessageQuery(conversationId)
+
+    const { messages: messagesData } = messages || []
+
+    const otherUser =
+        conversations
+            .find((c: { _id: string }) => c._id === conversationId)
+            ?.users.find((u: { _id: string }) => u._id !== _id) || {}
 
     return (
         <div className="flex flex-col h-screen w-3/4 bg-white border-l">
-            <div className="border-b flex items-center gap-2 p-[7.5px]">
-                <Avatar>
-                    <AvatarImage src={profileImage} />
-                </Avatar>
-                <div className="flex flex-col">
-                    <p>{name}</p>
-                    <span className="text-sm">Active now</span>
+            {otherUser && (
+                <div className="border-b flex items-center gap-2 p-[7.5px]">
+                    <Avatar>
+                        <AvatarImage src={otherUser.profileImage} />
+                    </Avatar>
+                    <div className="flex flex-col">
+                        <p>{otherUser.name}</p>
+                        <span className="text-sm">@{otherUser.username}</span>
+                    </div>
                 </div>
-            </div>
+            )}
+
             <ScrollArea className="flex-1">
-                <Message />
+                {messagesData?.map((message: IMessage, index: number) => (
+                    <Message key={index} message={message} />
+                ))}
             </ScrollArea>
 
-            <div className="flex items-center gap-2 p-2 bg-white border-t shadow-md">
-                <Input
-                    placeholder="Type a message..."
-                    className="flex-1 focus:ring-0 focus:outline-none rounded-lg p-2 border"
-                />
-                <Button aria-label="Send Message">
-                    <Send className="text-white h-5 w-5" />
-                </Button>
-            </div>
+            <InputField receiver={otherUser} />
         </div>
     )
 }
