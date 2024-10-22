@@ -15,8 +15,14 @@ import PreviousOrdersPage from './pages/dashboard/PreviousOrdersPage'
 import OrderInfoPage from './pages/dashboard/OrderInfoPage'
 import InboxPage from './pages/dashboard/InboxPage'
 import OnlyInboxPage from './pages/dashboard/OnlyInbox'
+import FloatingChat from './pages/FloatingMessageButton/FloatingMessageButton'
+import { useSelector } from 'react-redux'
+import { RootState } from './app/store'
+import IUser from './types/userInterface'
 
 export default function App() {
+    const { user } = useSelector((state: RootState) => state.auth)
+    const { role } = (user as IUser) || {}
     const authChecked = useAuthCheck()
 
     return !authChecked ? (
@@ -128,6 +134,7 @@ export default function App() {
                     }
                 />
             </Routes>
+            {role === 'user' && <FloatingChat />}
             <Toaster position="bottom-right" reverseOrder={false} />
         </BrowserRouter>
     )
