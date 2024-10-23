@@ -28,7 +28,7 @@ export default function FloatingChat() {
     const { user } = useSelector((state: RootState) => state.auth)
     const { _id } = user as IUser
     const { data } = useFetchUserByIdQuery('6708f9eb9c8252079123e5ed')
-    const adminUser = data?.user as IUser // Ensure this is treated as IUser
+    const adminUser = data?.user as IUser
     const [isOpen, setIsOpen] = useState(false)
     const [message, setMessage] = useState('')
     const [setMessageMutation, { isLoading }] = useSetMessageMutation()
@@ -45,11 +45,16 @@ export default function FloatingChat() {
 
     const conversationId = conversations[0]?._id
 
-    const { data: messagesData } = useGetMessageQuery(conversationId)
+    const { data: messagesData, refetch } = useGetMessageQuery(conversationId)
     const { messages } = messagesData || []
+    const messagesEndRef = useRef<HTMLDivElement>(null)
 
     const toggleChat = () => {
         setIsOpen(!isOpen)
+
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+        }
     }
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -66,16 +71,22 @@ export default function FloatingChat() {
         try {
             await setMessageMutation(data)
             setMessage('')
+            refetch()
         } catch (error) {
             toast.error((error as Error).message)
         }
     }
 
-    const messagesEndRef = useRef<HTMLDivElement>(null)
     useEffect(() => {
-        console.log('Messages Updated:', messages)
+        const interval = setInterval(() => {
+            refetch()
+        }, 2000)
+
+        return () => clearInterval(interval)
+    }, [refetch])
+
+    useEffect(() => {
         if (messagesEndRef.current) {
-            console.log('Scrolling to end')
             messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
         }
     }, [messages])
@@ -134,7 +145,11 @@ export default function FloatingChat() {
                                             return (
                                                 <div
                                                     key={index}
-                                                    className={`m-2 mb-4 flex items-end ${isSender ? 'justify-end' : 'justify-start'}`}
+                                                    className={`m-2 mb-4 flex items-end ${
+                                                        isSender
+                                                            ? 'justify-end'
+                                                            : 'justify-start'
+                                                    }`}
                                                 >
                                                     <div
                                                         className={getMessageClass(

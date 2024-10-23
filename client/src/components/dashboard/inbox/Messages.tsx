@@ -9,6 +9,7 @@ import { useGetAllConversationsQuery } from '@/features/conversations/conversati
 import IMessage from '@/types/messageInterface'
 import { useParams } from 'react-router-dom'
 import InputField from './InputField'
+import { useEffect } from 'react'
 
 export default function Messages() {
     const { conversationId } = useParams<{ conversationId: string }>()
@@ -18,14 +19,21 @@ export default function Messages() {
     const conversations =
         data && Array.isArray(data.conversations) ? data.conversations : []
 
-    const { data: messages } = useGetMessageQuery(conversationId)
-
+    const { data: messages, refetch } = useGetMessageQuery(conversationId)
     const { messages: messagesData } = messages || []
 
     const otherUser =
         conversations
             .find((c: { _id: string }) => c._id === conversationId)
             ?.users.find((u: { _id: string }) => u._id !== _id) || {}
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            refetch()
+        }, 2000)
+
+        return () => clearInterval(interval)
+    }, [refetch])
 
     return (
         <div className="flex flex-col h-screen w-3/4 bg-white border-l">
@@ -40,14 +48,12 @@ export default function Messages() {
                     </div>
                 </div>
             )}
-
             <ScrollArea className="flex-1">
                 {messagesData?.map((message: IMessage, index: number) => (
                     <Message key={index} message={message} />
                 ))}
             </ScrollArea>
-
-            <InputField receiver={otherUser} />
+            <InputField receiver={otherUser} refetchMessages={refetch} />
         </div>
     )
 }

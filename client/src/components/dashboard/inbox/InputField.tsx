@@ -16,9 +16,13 @@ interface IInputFieldProps {
         username: string
         profileImage: string
     }
+    refetchMessages: () => void
 }
 
-export default function InputField({ receiver }: IInputFieldProps) {
+export default function InputField({
+    receiver,
+    refetchMessages,
+}: IInputFieldProps) {
     const { user } = useSelector((state: RootState) => state.auth)
     const { _id } = user as IUser
     const [message, setMessage] = useState('')
@@ -39,6 +43,7 @@ export default function InputField({ receiver }: IInputFieldProps) {
         try {
             await setMessageMutation(data)
             setMessage('')
+            refetchMessages()
         } catch (error) {
             toast.error((error as Error).message)
         }
@@ -56,11 +61,13 @@ export default function InputField({ receiver }: IInputFieldProps) {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 required
+                disabled={isLoading}
             />
             <Button
                 aria-label="Send Message"
                 type="submit"
                 disabled={isLoading}
+                className="flex items-center justify-center"
             >
                 <Send className="text-white h-5 w-5" />
             </Button>
