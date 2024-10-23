@@ -55,19 +55,16 @@ export default function InputField({
             onSubmit={handleSubmit}
         >
             <Input
-                type="text"
                 placeholder="Type a message..."
                 className="flex-1 focus:ring-0 focus:outline-none rounded-lg p-2 border"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 required
-                disabled={isLoading}
             />
             <Button
                 aria-label="Send Message"
                 type="submit"
                 disabled={isLoading}
-                className="flex items-center justify-center"
             >
                 <Send className="text-white h-5 w-5" />
             </Button>

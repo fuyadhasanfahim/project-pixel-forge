@@ -51,10 +51,6 @@ export default function FloatingChat() {
 
     const toggleChat = () => {
         setIsOpen(!isOpen)
-
-        if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
-        }
     }
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -89,7 +85,7 @@ export default function FloatingChat() {
         if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
         }
-    }, [messages])
+    }, [isOpen, messages])
 
     return (
         <div className="fixed inset-0 overflow-hidden flex items-end justify-end z-50">
