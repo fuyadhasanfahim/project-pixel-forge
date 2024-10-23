@@ -7,7 +7,8 @@ export const conversationApi = apiSlice.injectEndpoints({
                 url: '/messages/get-all-conversations',
                 method: 'GET',
             }),
-            providesTags: ['Conversations'],
+            providesTags: ['Messages', 'Conversations'],
+            keepUnusedDataFor: 0,
         }),
     }),
 })

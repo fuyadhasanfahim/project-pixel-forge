@@ -92,7 +92,7 @@ export default function FloatingChat() {
             <div className="absolute right-4 bottom-4 space-y-2">
                 <Button
                     variant="outline"
-                    className="rounded-full w-12 h-12 p-0 flex items-center justify-center"
+                    className="rounded-full w-12 h-12 p-0 flex items-center justify-center shadow-md"
                     onClick={toggleChat}
                 >
                     {!isOpen ? (
