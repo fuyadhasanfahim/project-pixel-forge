@@ -12,7 +12,6 @@ import { useNavigate } from 'react-router-dom'
 
 export default function AdminDashboard() {
     const { data, isLoading } = useFetchAllOrdersQuery([])
-    console.log(data)
     const navigate = useNavigate()
 
     if (isLoading) {

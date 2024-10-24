@@ -1,8 +1,7 @@
 import { PlusIcon } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
     Select,
     SelectContent,
@@ -14,34 +13,50 @@ import {
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { DateTimePicker } from '../ui/DateTimePicker'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/app/store'
 import IUser from '@/types/userInterface'
-import { usePostOrderMutation } from '@/features/orders/orderApi'
 import toast from 'react-hot-toast'
-import { useNavigate } from 'react-router-dom'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Progress } from '@/components/ui/progress'
+import { format } from 'date-fns'
+import { Calendar as CalendarIcon } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { Calendar } from '@/components/ui/calendar'
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover'
+import { TimePicker } from '../TimePicker'
 
 export default function AddOrderForm() {
-    const [postOrder, { isLoading }] = usePostOrderMutation()
     const { user } = useSelector((state: RootState) => state.auth)
     const { _id, username } = user as IUser
-    const [selectedServices, setSelectedServices] = useState<string[]>([])
+    const [selectedServices, setSelectedServices] = useState<string>('')
     const [complexities, setComplexities] = useState<{ [key: string]: string }>(
         {},
     )
     const [additionalInstructions, setAdditionalInstructions] =
         useState<string>('')
-    const [outputFormat, setOutputFormat] = useState<string | undefined>()
-    const [deliveryDate, setDeliveryDate] = useState<Date | undefined>()
-    const navigate = useNavigate()
+    const [outputFormat, setOutputFormat] = useState<string>('')
+    const [files, setFiles] = useState<File[]>([])
+    const [progress, setProgress] = useState(0)
+
+    const [date, setDate] = useState<Date>()
+    const [time, setTime] = useState<{ hour: string; minute: string }>({
+        hour: '00',
+        minute: '00',
+    })
+
+    const [deliveryDate, setDeliveryDate] = useState<Date | null>(null)
 
     const complexityOptions = [
-        { label: 'Basic', price: '$5' },
-        { label: 'Simple', price: '$10' },
-        { label: 'Medium', price: '$15' },
-        { label: 'Complex', price: '$20' },
-        { label: 'Super Complex', price: '$30' },
+        { label: 'Basic $5' },
+        { label: 'Simple $10' },
+        { label: 'Medium $15' },
+        { label: 'Complex $20' },
+        { label: 'Super Complex $30' },
     ]
 
     const services = [
@@ -56,14 +71,6 @@ export default function AddOrderForm() {
         'Image Masking',
     ]
 
-    const handleServiceSelect = (service: string) => {
-        setSelectedServices((prevSelected) =>
-            prevSelected.includes(service)
-                ? prevSelected.filter((s) => s !== service)
-                : [...prevSelected, service],
-        )
-    }
-
     const handleComplexitySelect = (service: string, complexity: string) => {
         setComplexities((prevComplexities) => ({
             ...prevComplexities,
@@ -71,27 +78,56 @@ export default function AddOrderForm() {
         }))
     }
 
+    const handleFileUpload = (files: FileList) => {
+        const fileArray = Array.from(files)
+        setFiles((prevFiles) => [...prevFiles, ...fileArray])
+    }
+
+    const handleUpload = async () => {
+        const totalFiles = files.length
+
+        for (let i = 0; i < totalFiles; i++) {
+            await new Promise((resolve) => setTimeout(resolve, 1000))
+            setProgress(((i + 1) / totalFiles) * 100)
+        }
+    }
+
+    useEffect(() => {
+        if (date) {
+            const newDeliveryDate = new Date(date)
+
+            newDeliveryDate.setHours(parseInt(time.hour, 10))
+            newDeliveryDate.setMinutes(parseInt(time.minute, 10))
+            newDeliveryDate.setSeconds(0)
+
+            setDeliveryDate(newDeliveryDate)
+        }
+    }, [date, time])
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        await handleUpload()
+
         const data = {
             userId: _id,
             username,
-            services: selectedServices,
+            services: selectedServices ? [selectedServices] : [],
             complexities,
             additionalInstructions,
             outputFormat,
-            deliveryDate,
+            deliveryDate: deliveryDate,
+            files,
         }
 
-        try {
-            await postOrder(data).unwrap()
+        console.log(data)
 
+        try {
             toast.success(
                 'Successfully added to order. Wait to accept your order. Redirecting to dashboard...',
             )
 
             setTimeout(() => {
-                navigate('/dashboard')
+                // navigate('/dashboard')
             }, 2000)
         } catch (err) {
             toast.error((err as Error).message)
@@ -123,75 +159,94 @@ export default function AddOrderForm() {
                                 id="file-upload"
                                 accept="image/*"
                                 multiple
+                                onChange={(e) =>
+                                    handleFileUpload(e.target.files!)
+                                }
                                 className="hidden"
+                                required
                             />
                         </label>
                     </div>
-                    {/* {progress > 0 && <Progress value={progress} />} */}
+                    {files.length > 0 && (
+                        <p className="text-sm text-gray-600">
+                            {files.length === 0
+                                ? 'No file selected'
+                                : files.length > 1
+                                  ? `Selected ${files.length} files`
+                                  : `Selected ${files.length} file`}
+                        </p>
+                    )}
+                    {progress > 0 && (
+                        <div className="w-full">
+                            <Progress value={progress} />
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex flex-col">
                     <h3 className="mb-6 text-lg">Select Services</h3>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
-                        {services.map((service, index) => (
+                        {services.map((service) => (
                             <div
-                                key={index}
+                                key={service}
                                 className="flex flex-col space-y-2"
                             >
-                                <div className="flex items-center space-x-2">
-                                    <Checkbox
-                                        id={service}
-                                        checked={selectedServices.includes(
-                                            service,
-                                        )}
-                                        onCheckedChange={() =>
-                                            handleServiceSelect(service)
-                                        }
-                                    />
-                                    <Label
-                                        htmlFor={service}
-                                        className="text-sm font-medium leading-none"
-                                    >
-                                        {service}
-                                    </Label>
-                                </div>
-
-                                {selectedServices.includes(service) && (
-                                    <Select
-                                        onValueChange={(value) =>
-                                            handleComplexitySelect(
-                                                service,
-                                                value,
-                                            )
-                                        }
-                                    >
-                                        <SelectTrigger className="w-[180px]">
-                                            <SelectValue placeholder="Select Complexity" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectGroup>
-                                                <SelectLabel>
-                                                    Complexity & Price
-                                                </SelectLabel>
-                                                {complexityOptions.map(
-                                                    (complexity) => (
-                                                        <SelectItem
-                                                            key={
-                                                                complexity.label
-                                                            }
-                                                            value={
-                                                                complexity.label
-                                                            }
-                                                        >
-                                                            {complexity.label} -{' '}
-                                                            {complexity.price}
-                                                        </SelectItem>
-                                                    ),
-                                                )}
-                                            </SelectGroup>
-                                        </SelectContent>
-                                    </Select>
-                                )}
+                                <RadioGroup
+                                    value={selectedServices}
+                                    onValueChange={setSelectedServices}
+                                    required
+                                >
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem
+                                            value={service}
+                                            id={service}
+                                        />
+                                        <Label
+                                            htmlFor={service}
+                                            className="text-sm font-medium leading-none"
+                                        >
+                                            {service}
+                                        </Label>
+                                    </div>
+                                    {selectedServices === service && (
+                                        <Select
+                                            onValueChange={(value) =>
+                                                handleComplexitySelect(
+                                                    service,
+                                                    value,
+                                                )
+                                            }
+                                            required
+                                        >
+                                            <SelectTrigger className="w-[180px]">
+                                                <SelectValue placeholder="Select Complexity" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectGroup>
+                                                    <SelectLabel>
+                                                        Complexity & Price
+                                                    </SelectLabel>
+                                                    {complexityOptions.map(
+                                                        (complexity) => (
+                                                            <SelectItem
+                                                                key={
+                                                                    complexity.label
+                                                                }
+                                                                value={
+                                                                    complexity.label
+                                                                }
+                                                            >
+                                                                {
+                                                                    complexity.label
+                                                                }
+                                                            </SelectItem>
+                                                        ),
+                                                    )}
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                    )}
+                                </RadioGroup>
                             </div>
                         ))}
                     </div>
@@ -207,13 +262,14 @@ export default function AddOrderForm() {
                         }
                         placeholder="Add any details about your order..."
                         className="resize-none h-32"
+                        required
                     />
                 </div>
 
                 <div className="flex items-center flex-wrap gap-5">
                     <div className="flex flex-col">
                         <h3 className="mb-3 text-lg">Choose Output Format</h3>
-                        <Select onValueChange={setOutputFormat}>
+                        <Select onValueChange={setOutputFormat} required>
                             <SelectTrigger className="w-[200px]">
                                 <SelectValue placeholder="Select an Image Format" />
                             </SelectTrigger>
@@ -241,20 +297,44 @@ export default function AddOrderForm() {
 
                     <div className="flex flex-col">
                         <h3 className="mb-3 text-lg">Choose Delivery Date</h3>
-                        <DateTimePicker
-                            className="w-72"
-                            granularity="minute"
-                            hourCycle={24}
-                            value={deliveryDate}
-                            onChange={setDeliveryDate}
-                        />
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button
+                                    variant={'outline'}
+                                    className={cn(
+                                        'w-[280px] justify-start text-left font-normal',
+                                        !date && 'text-muted-foreground',
+                                    )}
+                                >
+                                    <CalendarIcon />
+                                    {date ? (
+                                        format(date, 'PPP')
+                                    ) : (
+                                        <span>Pick a date</span>
+                                    )}
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                    mode="single"
+                                    selected={date}
+                                    onSelect={setDate}
+                                    fromDate={new Date()}
+                                    initialFocus
+                                    required
+                                />
+                            </PopoverContent>
+                        </Popover>
+                    </div>
+
+                    <div>
+                        <h3 className="mb-3 text-lg">Choose Delivery Time</h3>
+                        <TimePicker setTime={setTime} />
                     </div>
                 </div>
 
                 <div className="flex justify-center">
-                    <Button type="submit" disabled={isLoading}>
-                        Submit Order
-                    </Button>
+                    <Button type="submit">Submit Order</Button>
                 </div>
             </form>
         </div>

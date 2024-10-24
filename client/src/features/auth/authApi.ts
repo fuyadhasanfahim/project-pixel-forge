@@ -89,8 +89,7 @@ export const authApi = apiSlice.injectEndpoints({
             }),
             async onQueryStarted(_arg, { queryFulfilled }) {
                 try {
-                    const { data } = await queryFulfilled
-                    console.log('Email verified:', data)
+                    await queryFulfilled
                 } catch (error) {
                     console.error('Error verifying email:', error)
                 }
